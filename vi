@@ -3,31 +3,45 @@ function pat()
 {
 	echo "$1" | grep -q "$2"
 }
+
+# Defer functions into background and disown them
+function defer()
+{
+	case $1 in
+		less|dhex|timg|links|cvlc)
+			"$@"
+			;;
+		*)
+			"$@" &
+			disown $!
+			;;
+	esac
+}
 for f in "$@"; do
 	mime=$(file --brief --mime-type $f)
 	if pat $mime "^image"; then
 		if [[ "$DISPLAY" != "" ]]; then
-			feh $f
+			defer feh $f
 		else
-			timg $f
+			defer timg $f
 			if [[ "$2" != "" ]]; then
 				sleep 1
 			fi
 		fi
 	elif pat $mime "^video"; then
 		if [[ "$DISPLAY" != "" ]]; then
-			mplayer $f
+			defer mplayer $f
 		else
-			cvlc $f
+			defer cvlc $f
 		fi
 	elif [[ "$mime" == "text/html" ]]; then
-		links $f
+		defer links $f
 	elif pat $mime "^text"; then
-		less $f
+		defer less $f
 	elif [[ "$mime" == "application/pdf" ]]; then
-		mupdf $f
+		defer mupdf $f
 	elif [[ "$mime" == "application/octet-stream" ]]; then
-		dhex $f
+		defer dhex $f
 	else
 		echo $f "unrecognized format:" $mime
 	fi;
