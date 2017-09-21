@@ -1,4 +1,7 @@
 #!/bin/bash
+# Opens a default editor for different kind of files
+# based on MIME types.
+
 
 DEFAULTEDIT=textadept
 TEXTEDIT=textadept
