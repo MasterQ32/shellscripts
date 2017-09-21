@@ -1,0 +1,38 @@
+#!/bin/bash
+
+DEFAULTEDIT=textadept
+TEXTEDIT=textadept
+IMAGEEDIT=gimp
+AUDIOEDIT=audacity
+BINEDIT=dhex
+if [[ $DISPLAY == "" ]]; then
+	DEFAULTEDIT=nano;
+	TEXTEDIT=nano;
+fi
+
+file --mime-type "$@"
+
+for file in "$@"; do
+	echo $file;
+	if [[ -a $file ]]; then
+		if file --mime-type $file | grep -i "text/"; then
+			$TEXTEDIT "$file" 2>&1>/dev/null & disown $TEXTEDIT; # & disown $TEXTEDIT;
+			continue;
+		fi;
+		if file --mime-type $file | grep -i "empty"; then
+			$TEXTEDIT "$file" 2>&1>/dev/null & disown $TEXTEDIT;
+			continue;
+		fi;
+		if file --mime-type $file | grep -i "image/"; then
+			$IMAGEEDIT "$file" 2>&1>/dev/null & disown $IMAGEEDIT;
+			continue;
+		fi;
+		if file --mime-type $file | grep -i "audio/"; then
+			$AUDIOEDIT "$file" 2>&1>/dev/null & disown $AUDIOEDIT;
+			continue;
+		fi;
+		$BINEDIT "$file";
+	else
+		$DEFAULTEDIT "$file" 2>&1>/dev/null & disown $DEFAULTEDIT;
+	fi;
+done

@@ -1,0 +1,34 @@
+#!/bin/bash
+function pat()
+{
+	echo "$1" | grep -q "$2"
+}
+for f in "$@"; do
+	mime=$(file --brief --mime-type $f)
+	if pat $mime "^image"; then
+		if [[ "$DISPLAY" != "" ]]; then
+			feh $f
+		else
+			timg $f
+			if [[ "$2" != "" ]]; then
+				sleep 1
+			fi
+		fi
+	elif pat $mime "^video"; then
+		if [[ "$DISPLAY" != "" ]]; then
+			mplayer $f
+		else
+			cvlc $f
+		fi
+	elif [[ "$mime" == "text/html" ]]; then
+		links $f
+	elif pat $mime "^text"; then
+		less $f
+	elif [[ "$mime" == "application/pdf" ]]; then
+		mupdf $f
+	elif [[ "$mime" == "application/octet-stream" ]]; then
+		dhex $f
+	else
+		echo $f "unrecognized format:" $mime
+	fi;
+done
